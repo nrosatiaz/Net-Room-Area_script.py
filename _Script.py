@@ -22,7 +22,7 @@ uidoc = __revit__.ActiveUIDocument
 doc = __revit__.ActiveUIDocument.Document
 
 
-def find_phase(obj_ph):
+def find_phase(obj_phase):
   '''
   DOCSTRING:  function will determin phase of object
   INPUT: Object
@@ -32,7 +32,7 @@ def find_phase(obj_ph):
   count = 0
   for p in pha:
     p_int = p.Id.IntegerValue
-    if p_int == obj_ph:
+    if p_int == obj_phase:
       break
     else:
       count += 1
@@ -50,21 +50,24 @@ filter_string_begin_with = DB.FilterStringBeginsWith()
 string_begins_with_12_Base = DB.FilterStringRule(family_name_provider, filter_string_begin_with, '12 BASE', 1)
 #Filter for specific string
 string_begins_with_12_Tall = DB.FilterStringRule(family_name_provider, filter_string_begin_with, '12 Tall', 1)
+#Filter for specific string
+string_begins_with_12_Case = DB.FilterStringRule(family_name_provider, filter_string_begin_with, '12  CASE - BASE', 1)
 
-string_begins_with_12_Case = DB.FilterStringRule(family_name_provider, filter_string_begin_with, '12  CASE', 1)
-
-
-
-# Filter strings
+# Create Filter strings
 p_fil_a = DB.ElementParameterFilter(string_begins_with_12_Base)
 p_fil_b = DB.ElementParameterFilter(string_begins_with_12_Tall)
+p_fil_c = DB.ElementParameterFilter(string_begins_with_12_Case)
+
+#Create filter list
+filter_list = [p_fil_a, p_fil_b, p_fil_c]
 
 # Determine if one of the filters has items that pass
-param_filter = DB.LogicalOrFilter(p_fil_a, p_fil_b)
-# Collect items with the parameters filetered above
+param_filter = DB.LogicalOrFilter(filter_list)
+# Collect items that pass parameter filetered above
 cwk_coll = DB.FilteredElementCollector(doc)\
         .WherePasses(param_filter)\
         .WhereElementIsNotElementType()
+
 # Collect items with the parameters filtered above all the way to Element IDs\
 cwk_sel = DB.FilteredElementCollector(doc)\
         .WherePasses(param_filter)\
@@ -72,7 +75,7 @@ cwk_sel = DB.FilteredElementCollector(doc)\
         .ToElementIds()
 
 
-# Collece all the Rooms in a project
+# Collect all the Rooms in a project
 all_rms = FilteredElementCollector(doc)\
           .OfCategory(BuiltInCategory.OST_Rooms)\
           .WhereElementIsNotElementType()
@@ -106,16 +109,16 @@ for cwk in cwk_coll:
    cwk_element = doc.GetElement(cwk)
 # Get depth of Casework element
    try: 
-     de = cwk_element.Symbol.LookupParameter('Depth').AsDouble()
+     casework_depth = cwk_element.Symbol.LookupParameter('Depth').AsDouble()
    except:
-     de = cwk_element.LookupParameter('Depth').AsDouble()
+     casework_depth = cwk_element.LookupParameter('Depth').AsDouble()
 # Get Width of Casework element
    try:
-     wi = cwk_element.Symbol.LookupParameter('Width').AsDouble()
+     casework_width = cwk_element.Symbol.LookupParameter('Width').AsDouble()
    except:
-     wi = cwk_element.LookupParameter('Width').AsDouble()
+     casework_width = cwk_element.LookupParameter('Width').AsDouble()
 # Get Area value for Casework element
-   cwk_area = de * wi
+   cwk_area = casework_depth * casework_width
    cwk_area = int(cwk_area)
    cwk_area = math.ceil(cwk_area)
 # Get Casework Base Point
@@ -146,6 +149,7 @@ for cwk in cwk_coll:
            nra_param_wk.Set(red_area)
            counter += 1
 transaction.Commit()
+
 print('{} Casework objects Detected'.format(counter))
 
 transaction = Transaction(doc, "Add Net Reduction to Room")
@@ -154,6 +158,7 @@ transaction.Start()
 # After all casework has been checked find difference between
 # Actual Area and Net Area and add Recuction value to 
 # the Net SF Recuction Instance Parameter field
+
 rm_no_occ_set = []
 rm_num_nocc = []
 rmcnt = 0
