@@ -22,7 +22,7 @@ uidoc = __revit__.ActiveUIDocument
 doc = __revit__.ActiveUIDocument.Document
 
 
-def find_phase(obj_ph):
+def find_phase(obj_phase):
   '''
   DOCSTRING:  function will determin phase of object
   INPUT: Object
@@ -32,7 +32,7 @@ def find_phase(obj_ph):
   count = 0
   for p in pha:
     p_int = p.Id.IntegerValue
-    if p_int == obj_ph:
+    if p_int == obj_phase:
       break
     else:
       count += 1
@@ -58,9 +58,12 @@ string_begins_with_12_Case = DB.FilterStringRule(family_name_provider, filter_st
 # Filter strings
 p_fil_a = DB.ElementParameterFilter(string_begins_with_12_Base)
 p_fil_b = DB.ElementParameterFilter(string_begins_with_12_Tall)
+p_fil_c = DB.ElementParameterFiletr(string_begins_with_12_Case)
+
+filter_list = [p_fil_a, p_fil_b, p_fil_c]
 
 # Determine if one of the filters has items that pass
-param_filter = DB.LogicalOrFilter(p_fil_a, p_fil_b)
+param_filter = DB.LogicalOrFilter(filter_list)
 # Collect items with the parameters filetered above
 cwk_coll = DB.FilteredElementCollector(doc)\
         .WherePasses(param_filter)\
