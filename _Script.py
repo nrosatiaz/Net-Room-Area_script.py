@@ -51,7 +51,7 @@ string_begins_with_12_Base = DB.FilterStringRule(family_name_provider, filter_st
 #Filter for specific string
 string_begins_with_12_Tall = DB.FilterStringRule(family_name_provider, filter_string_begin_with, '12 Tall', 1)
 
-string_begins_with_12_Case = DB.FilterStringRule(family_name_provider, filter_string_begin_with, '12  CASE', 1)
+string_begins_with_12_Case = DB.FilterStringRule(family_name_provider, filter_string_begin_with, '12  CASE - BASE', 1)
 
 
 
